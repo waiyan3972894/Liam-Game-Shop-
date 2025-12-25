@@ -1,0 +1,210 @@
+        <!DOCTYPE html>
+        <html lang="my">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Liam Game Shop</title>
+            <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+            <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+            <style>
+                :root { --primary-blue: #0d6efd; }
+                body { background: #f4f7f6; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+                
+                /* အစမှာ အကုန်ဖျောက်ထားမည် */
+                #auth-section, #main-content { display: none; }
+        
+                .wallet-card {
+                    background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+                    color: white; border-radius: 20px; padding: 25px;
+                    box-shadow: 0 10px 25px rgba(0,0,0,0.2); border: none; margin-bottom: 25px;
+                }
+                .balance-amount { font-size: 2.5rem; font-weight: 800; color: #38bdf8; }
+        
+                .product-card { border: none; border-radius: 16px; overflow: hidden; background: white; transition: 0.3s; height: 100%; position: relative; }
+                .product-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
+                .main-img { height: 160px; object-fit: cover; cursor: pointer; width: 100%; background: #eee; }
+                
+                .discount-badge { position: absolute; top: 12px; left: 12px; background: #ff3e3e; color: white; padding: 3px 10px; font-size: 0.75rem; font-weight: bold; border-radius: 6px; z-index: 5; }
+                
+                .category-bar::-webkit-scrollbar { display: none; }
+                .category-bar .btn { border-radius: 50px; white-space: nowrap; border: 1px solid #ddd; background: white; padding: 6px 20px; }
+                .category-bar .btn.active { background: var(--primary-blue) !important; color: white !important; }
+                
+                .carousel-item img { height: 350px; object-fit: contain; background: #000; }
+                .payment-info-box { background: #f0f9ff; border: 1px dashed #0ea5e9; border-radius: 12px; padding: 12px; margin-top: 10px; }
+            </style>
+        </head>
+        <body>
+        
+            <div id="auth-section" class="container mt-5">
+                <div class="mx-auto" style="max-width: 400px;">
+                    <div class="card p-4 shadow-sm border-0 rounded-4 bg-dark text-white">
+                        <h4 class="text-center fw-bold mb-4" id="auth-title">Welcome To Liam Game Shop</h4>
+                        
+                        <form id="login-form">
+                            <input type="email" id="login-email" class="form-control mb-3" placeholder="Email" required>
+                            <input type="password" id="login-pass" class="form-control mb-3" placeholder="Password" required>
+                            <button type="submit" class="btn btn-primary w-100 fw-bold py-2">Login</button>
+                            <p class="text-center mt-3 small">အကောင့်မရှိသေးပါက <a href="#" class="text-info" onclick="toggleAuth(true)">Register လုပ်ပါ</a></p>
+                        </form>
+        
+                        <form id="reg-form" style="display: none;">
+                            <input type="text" id="reg-name" class="form-control mb-3" placeholder="နာမည်" required>
+                            <input type="email" id="reg-email" class="form-control mb-3" placeholder="Email" required>
+                            <input type="password" id="reg-pass" class="form-control mb-3" placeholder="Password" required>
+                            <input type="text" id="reg-tg" class="form-control mb-3" placeholder="Telegram Username" required>
+                            <button type="submit" class="btn btn-success w-100 fw-bold py-2">Create Account</button>
+                            <p class="text-center mt-3 small">အကောင့်ရှိပြီးသားပါက <a href="#" class="text-info" onclick="toggleAuth(false)">Login ဝင်ပါ</a></p>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        
+            <div id="main-content">
+                <nav class="navbar navbar-light bg-white border-bottom sticky-top shadow-sm">
+                    <div class="container d-flex justify-content-between align-items-center">
+                        <span class="navbar-brand fw-bold text-primary">💎 Liam Game Shop</span>
+                        <div class="d-flex align-items-center gap-3">
+                            <a href="https://t.me/Real_Jandel1" target="_blank" class="text-info fs-4"><i class="bi bi-telegram"></i></a>
+                            <button class="btn btn-outline-danger btn-sm border-0" id="logout-btn"><i class="bi bi-box-arrow-right"></i></button>
+                        </div>
+                    </div>
+                </nav>
+        
+                <div class="container mt-4 pb-5">
+                    <div class="card wallet-card">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="small opacity-75"><i class="bi bi-wallet2 me-1"></i> Balance</div>
+                                <div class="balance-amount mt-1"><span id="wallet-balance">0</span> <small style="font-size:1rem;">Ks</small></div>
+                                <div class="mt-1 small opacity-75" id="user-display">Loading...</div>
+                            </div>
+                            <button class="btn btn-light btn-sm fw-bold px-3 rounded-pill" data-bs-toggle="modal" data-bs-target="#depositModal">Top-up</button>
+                        </div>
+                    </div>
+        
+                    <div class="mb-4 d-flex gap-2 overflow-auto category-bar pb-2" id="cat-bar">
+                        <button class="btn active" onclick="filterCat('All', this)">All</button>
+                        <button class="btn" onclick="filterCat('Dia', this)">Dia</button>
+                        <button class="btn" onclick="filterCat('Robux', this)">Robux</button>
+                        <button class="btn" onclick="filterCat('Blox Fruit', this)">Blox Fruit</button>
+                    </div>
+        
+                    <div id="product-list" class="row g-3"></div>
+                </div>
+            </div>
+        
+            <div class="modal fade" id="imageModal" tabindex="-1">
+                <div class="modal-dialog modal-lg modal-dialog-centered">
+                    <div class="modal-content border-0 bg-dark text-white rounded-4 overflow-hidden">
+                        <div class="modal-header border-0 pb-0">
+                            <h5 id="detailTitle" class="fw-bold mb-0"></h5>
+                            <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="detailCarousel" class="carousel slide" data-bs-ride="carousel">
+                                <div class="carousel-inner" id="detailImages"></div>
+                                <button class="carousel-control-prev" type="button" data-bs-target="#detailCarousel" data-bs-slide="prev"><span class="carousel-control-prev-icon"></span></button>
+                                <button class="carousel-control-next" type="button" data-bs-target="#detailCarousel" data-bs-slide="next"><span class="carousel-control-next-icon"></span></button>
+                            </div>
+                            <div class="p-4 bg-white text-dark">
+                                <p id="detailDesc" class="text-muted small mb-3" style="white-space: pre-line;"></p>
+                                <button id="detailBuyBtn" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">ဝယ်ယူမည်</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="modal fade" id="orderModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 rounded-4 shadow-lg">
+                        <div class="modal-header bg-primary text-white border-0">
+                            <h5 class="mb-0">🛒 Order Form</h5>
+                            <button class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <form id="orderForm">
+                            <div class="modal-body">
+                                <input type="hidden" id="modalItemName"><input type="hidden" id="modalItemPrice">
+                                <input type="hidden" id="modalProdId"><input type="hidden" id="modalCatName">
+                                
+                                <div class="mb-3">
+                                    <label class="small fw-bold">ပစ္စည်းအမည်</label>
+                                    <input type="text" id="displayItemName" class="form-control bg-light border-0 fw-bold" readonly>
+                                </div>
+        
+                                <div class="p-3 bg-light rounded-3 mb-3 border">
+                                    <label class="small fw-bold mb-2 d-block">ငွေပေးချေမှု ရွေးချယ်ပါ</label>
+                                    <div class="form-check mb-2">
+                                        <input class="form-check-input" type="radio" name="payType" id="p_wallet" value="Wallet" checked onchange="updateOrderUI()">
+                                        <label class="form-check-label small" for="p_wallet">Wallet Balance</label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="radio" name="payType" id="p_direct" value="Direct" onchange="updateOrderUI()">
+                                        <label class="form-check-label small" for="p_direct">Direct Pay (Kpay/Wave)</label>
+                                    </div>
+                                </div>
+        
+                                <div id="directPayDetails" style="display:none;" class="payment-info-box">
+                                    <div class="small fw-bold text-danger mb-2">အောက်ပါဖုန်းသို့ ငွေလွဲပြီး ပြေစာတင်ပေးပါ</div>
+                                    <div class="small">Kpay: 09402526756 (DawThiDarPyone)</div>
+                                    <div class="small mb-2">Wave: 09672728957 (Maung Lwin)</div>
+                                    <input type="file" id="orderSlip" class="form-control form-control-sm mt-2" accept="image/*">
+                                </div>
+        
+                                <div id="robuxInputs" style="display:none;" class="p-3 border rounded-3 mb-3 bg-warning bg-opacity-10">
+                                    <label class="small fw-bold text-dark mb-2">🔑 Roblox Account Info</label>
+                                    <input type="text" id="rbxUser" class="form-control mb-2" placeholder="Roblox Username">
+                                    <input type="password" id="rbxPass" class="form-control" placeholder="Roblox Password">
+                                </div>
+        
+                                <input type="text" id="cusName" class="form-control mb-2" placeholder="နာမည်" required>
+                                <input type="tel" id="cusPhone" class="form-control mb-2" placeholder="ဖုန်းနံပါတ်" required>
+                                <textarea id="gameInfo" class="form-control" rows="2" placeholder="Player ID / Other Info" required></textarea>
+                            </div>
+                            <div class="modal-footer border-0 pb-4">
+                                <button type="submit" id="orderBtn" class="btn btn-primary w-100 fw-bold py-2 shadow">Confirm & Send Order</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        
+            <div class="modal fade" id="depositModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border-0 rounded-4">
+                        <div class="modal-header bg-success text-white border-0"><h5>💰 Top-up</h5><button class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                        <form id="depositForm">
+                            <div class="modal-body">
+                                <div class="payment-info-box">
+                                    <div class="small">Kpay: 09402526756 (DawThiDarPyone)</div>
+                                    <div class="small">Wave: 09672728957 (Maung Lwin)</div>
+                                </div>
+                                <label class="small fw-bold mt-2">ဖြည့်မည့်ပမာဏ (Ks)</label>
+                                <input type="number" id="depAmount" class="form-control mb-2" placeholder="ဥပမာ- 5000" required>
+                                <label class="small fw-bold">ငွေလွဲပြေစာ</label>
+                                <input type="file" id="depSlip" class="form-control" accept="image/*" required>
+                            </div>
+                            <div class="modal-footer border-0">
+                                <button type="submit" id="depBtn" class="btn btn-success w-100 py-2 fw-bold">Submit Request</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        
+            <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+            <script type="module" src="customer.js"></script>
+            <script>
+                function toggleAuth(isReg) {
+                    document.getElementById('auth-title').innerText = isReg ? 'Register' : 'Welcome To Liam Game Shop';
+                    document.getElementById('reg-form').style.display = isReg ? 'block' : 'none';
+                    document.getElementById('login-form').style.display = isReg ? 'none' : 'block';
+                }
+                function updateOrderUI() {
+                    const isDirect = document.getElementById('p_direct').checked;
+                    document.getElementById('directPayDetails').style.display = isDirect ? 'block' : 'none';
+                }
+            </script>
+        </body>
+        </html>
