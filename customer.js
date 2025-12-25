@@ -17,7 +17,7 @@ const db = getFirestore(app);
 
 // သင်၏ Bot Token နှင့် Chat ID
 const BOT_TOKEN = "8509262213:AAHTB8EIG2lLxMPLxQpRiTpEuMSF0G0AYPk"; 
-const CHAT_ID = "7788156126";
+const CHAT_ID = "7247933813";
 let userData = null;
 
 // --- ၁။ အကောင့်ဝင်ခြင်းရှိမရှိ စစ်ဆေးခြင်း ---
